@@ -33,7 +33,7 @@ class DownloadManager:
             filename = data[0]['files'][0]['filename']
             downloadUrl = data[0]['files'][0]['url']
 
-        success = await self.modrinth.downloadMod(url=downloadUrl, dest=f"mods/{filename}")
+        success = await self.modrinth.downloadMod(url=downloadUrl, dest=f"testing/{filename}")
 
         if success:
             print(f"Successfuly downloaded {filename}")
@@ -50,10 +50,10 @@ class DownloadManager:
                 mods = json.load(f)
 
             if onlyServer:
-                print("Not downloading client side mods")
+                print("Not downloading client side testing")
 
             if not usingConnector:
-                print("Sinytra connector not being used. Only downloading mods that match given loader")
+                print("Sinytra connector not being used. Only downloading testing that match given loader")
 
             for i in mods:
                 if not i['filename'].split('.')[-1] in ('jar', 'disabled'):
