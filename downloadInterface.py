@@ -1,4 +1,6 @@
 import json
+import os.path
+
 import modrinthInterface
 
 class DownloadManager:
@@ -33,7 +35,10 @@ class DownloadManager:
             filename = data[0]['files'][0]['filename']
             downloadUrl = data[0]['files'][0]['url']
 
-        success = await self.modrinth.downloadMod(url=downloadUrl, dest=f"testing/{filename}")
+        if not os.path.exists("mods"):
+            os.makedirs("mods")
+
+        success = await self.modrinth.downloadModFromModrinth(url=downloadUrl, dest=f"mods/{filename}")
 
         if success:
             print(f"Successfuly downloaded {filename}")

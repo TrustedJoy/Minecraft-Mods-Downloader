@@ -1,9 +1,6 @@
-from urllib3 import proxy_from_url
-
 import managerExceptions
 import requests
 import json
-import asyncio
 
 class ModrinthManager:
     def __init__(self):
@@ -44,7 +41,7 @@ class ModrinthManager:
 
         return data[0]['environment']
 
-    async def downloadMod(self, url = None, dest = None):
+    async def downloadModFromModrinth(self, url = None, dest = None):
         try:
             if not url:
                 raise managerExceptions.NoURL
