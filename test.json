@@ -1,0 +1,74 @@
+[
+    {
+        "filename": "Chunky-Fabric-1.5.3.jar.disabled",
+        "name": "Chunky",
+        "url": "https://modrinth.com/mod/fALzjamp",
+        "version": "1.5.3"
+    },
+    {
+        "filename": "Controlling-fabric-26.2-26.2.2.jar",
+        "name": "Controlling",
+        "url": "https://modrinth.com/mod/xv94TkTM",
+        "version": "26.2.2"
+    },
+    {
+        "filename": "DistantHorizons-3.3.0-26.2-fabric-neoforge.jar",
+        "name": "Distant Horizons",
+        "url": "https://modrinth.com/mod/uCdwusMi",
+        "version": "3.3.0"
+    },
+    {
+        "filename": "fpsdisplay-5.1.0+26.2.jar",
+        "name": "FPS-Display",
+        "url": "https://modrinth.com/mod/DIlqwRFH",
+        "version": "5.1.0+26.2"
+    },
+    {
+        "filename": "fabric-api-0.160.0+26.2.jar",
+        "name": "Fabric API",
+        "url": "https://modrinth.com/mod/P7dR8mSH",
+        "version": "0.160.0+26.2"
+    },
+    {
+        "filename": "iris-fabric-1.11.4+mc26.2.jar",
+        "name": "Iris",
+        "url": "https://modrinth.com/mod/YL57xq9U",
+        "version": "1.11.4+mc26.2"
+    },
+    {
+        "filename": "justzoom_fabric_2.1.5_MC_26.2.jar",
+        "name": "Just Zoom",
+        "url": "https://modrinth.com/mod/iAiqcykM",
+        "version": "2.1.5"
+    },
+    {
+        "filename": "konkrete_fabric_1.11.1_MC_26.2.jar",
+        "name": "Konkrete",
+        "url": "https://modrinth.com/mod/J81TRJWm",
+        "version": "1.11.1"
+    },
+    {
+        "filename": "modmenu-20.0.2.jar",
+        "name": "Mod Menu",
+        "url": "https://modrinth.com/mod/mOgUt4GM",
+        "version": "20.0.2"
+    },
+    {
+        "filename": "placeholder-api-3.1.0-beta.1+26.2.jar",
+        "name": "Placeholder API",
+        "url": "https://modrinth.com/mod/eXts2L7r",
+        "version": "3.1.0-beta.1+26.2"
+    },
+    {
+        "filename": "Searchables-fabric-26.2-1.0.1.jar",
+        "name": "Searchables",
+        "url": "https://modrinth.com/mod/fuuu3xnx",
+        "version": "1.0.1"
+    },
+    {
+        "filename": "sodium-fabric-0.9.2+mc26.2.jar",
+        "name": "Sodium",
+        "url": "https://modrinth.com/mod/AANobbMI",
+        "version": "0.9.2+mc26.2"
+    }
+]
