@@ -45,27 +45,46 @@ class DownloadManager:
 
         else:
             print(f"Failed at mod with ID: {modID}")
+
+            with open('mods/.unable.txt', 'a+') as f:
+                f.write(f"{modName}")
+
             exit()
 
 
     async def parseFileAndDownload(self, file = None, gameVersion = None, loader = None, onlyServer = True, usingConnector = False):
 
         try:
+            with open('mods/.able.txt', 'w'):
+                pass
+
+            with open('mods/.unable.txt', 'w'):
+                pass
+
             with open(file, 'r') as f:
                 mods = json.load(f)
 
             if onlyServer:
-                print("Not downloading client side testing")
+                print("Not downloading client side mods")
 
             if not usingConnector:
-                print("Sinytra connector not being used. Only downloading testing that match given loader")
+                print("Sinytra connector not being used. Only downloading mods that match given loader")
 
             for i in mods:
                 if not i['filename'].split('.')[-1] in ('jar', 'disabled'):
                     continue
 
                 if not i['url'].split('/')[2] == "modrinth.com":
+                    print("Curseforge Mod. Not able to download")
+                    with open('mods/.unable.txt', 'a+') as f:
+                        f.write(f"{i['url']}\n")
                     continue
+
+                else:
+                    with open('mods/.able.txt', 'a+') as f:
+                        f.write(f"{i['url']}\n")
+
+                    #continue
 
                 modID = i['url'].split('/')[-1]
                 modVersion = i['version']

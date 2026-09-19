@@ -15,13 +15,17 @@ class ModrinthManager:
                 gameVersion = str(json.dumps([gameVersion]))
                 loader = str(json.dumps([loader]))
 
-                if usingConnector:
-                    loader = '["forge", "fabric", "neoforge]'
-
                 url = f'https://api.modrinth.com/v2/project/{modID}/version'
 
                 params = {'game_versions' : gameVersion, 'loaders' : loader}
                 r = requests.get(url, params=params)
+
+                if not r:
+                    if usingConnector:
+                        loader = '["forge", "fabric", "neoforge]'
+
+                    params = {'game_versions': gameVersion, 'loaders': loader}
+                    r = requests.get(url, params=params)
 
                 if r.status_code == 404:
                     raise managerExceptions.NotFoundError

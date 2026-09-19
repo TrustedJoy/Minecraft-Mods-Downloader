@@ -3,7 +3,9 @@
 
 I made this cause I was bored in class. Takes a json file exported from Prism and downloads all the mods. Mainly made it so I could automatically download mods for a server.
 
+Currently downloads only from modrinth
 
+Adds curseforge mods to a file called .unable.txt under the mods folder
 
 
 ## How To Use
