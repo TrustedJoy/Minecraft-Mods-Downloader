@@ -1,6 +1,6 @@
 import json
-import os.path
-
+import os
+import inspect
 import modrinthInterface
 
 class DownloadManager:
@@ -55,6 +55,8 @@ class DownloadManager:
     async def parseFileAndDownload(self, file = None, gameVersion = None, loader = None, onlyServer = True, usingConnector = False):
 
         try:
+            os.makedirs("mods", exist_ok=True)
+
             with open('mods/.able.txt', 'w'):
                 pass
 
@@ -70,8 +72,14 @@ class DownloadManager:
             if not usingConnector:
                 print("Sinytra connector not being used. Only downloading mods that match given loader")
 
+            downloadedMods = [f for f in os.listdir('mods') if os.path.isfile(f"mods/{f}")]
+
             for i in mods:
                 if not i['filename'].split('.')[-1] in ('jar', 'disabled'):
+                    continue
+
+                if i['filename'] in downloadedMods:
+                    print(f"Mod {i['filename']} already downloaded. Skipping")
                     continue
 
                 if not i['url'].split('/')[2] == "modrinth.com":
@@ -101,4 +109,4 @@ class DownloadManager:
                 await self.downloadMod(modID=modID, gameVersion=gameVersion, loader=loader, modVersion=modVersion, usingConnector=usingConnector)
 
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"ERROR: {e} at mod with id {modID} in function {inspect.currentframe().f_code.co_name}")

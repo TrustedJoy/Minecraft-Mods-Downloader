@@ -29,3 +29,11 @@ class NoURL(Exception):
 
     def __str__(self):
         return f"{self.message} (Error Code: {self.errorCode})"
+
+class EmptyResponse(Exception):
+    def __init__(self):
+        self.message = "Recieved empty response"
+        self.errorCode = 204
+
+    def __str__(self):
+        return f"{self.message} (Error Code: {self.errorCode}"

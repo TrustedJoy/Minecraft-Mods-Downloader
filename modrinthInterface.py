@@ -1,3 +1,4 @@
+import inspect
 import managerExceptions
 import requests
 import json
@@ -20,12 +21,15 @@ class ModrinthManager:
                 params = {'game_versions' : gameVersion, 'loaders' : loader}
                 r = requests.get(url, params=params)
 
-                if not r:
+                if not len(r.json()):
                     if usingConnector:
                         loader = '["forge", "fabric", "neoforge]'
 
-                    params = {'game_versions': gameVersion, 'loaders': loader}
-                    r = requests.get(url, params=params)
+                        params = {'game_versions': gameVersion, 'loaders': loader}
+                        r = requests.get(url, params=params)
+
+                    else:
+                        raise managerExceptions.EmptyResponse
 
                 if r.status_code == 404:
                     raise managerExceptions.NotFoundError
@@ -36,7 +40,7 @@ class ModrinthManager:
                 raise managerExceptions.ParamError
 
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"ERROR: {e} at mod with ID {modID} in function {inspect.currentframe().f_code.co_name}")
 
 
     async def getEnvironment(self, modID = None, gameVersion = None, loader = None, usingConnector = False):
@@ -57,7 +61,7 @@ class ModrinthManager:
 
         except Exception as e:
 
-            print(f"ERROR: {e}")
+            print(f"ERROR: {e} in function: {inspect.currentframe().f_code.co_name}")
             return 0
 
         return  1
