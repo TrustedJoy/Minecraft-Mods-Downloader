@@ -1,6 +1,8 @@
 import json
 import os
 import inspect
+from typing import Any
+
 import modrinthInterface
 
 class DownloadManager:
@@ -8,32 +10,11 @@ class DownloadManager:
         self.modrinth = modrinthInterface.ModrinthManager()
         pass
 
-    async def downloadMod(self, modID = None, gameVersion = None, loader = None, modVersion = None, usingConnector = False):
+    async def downloadMod(self, modID = None, gameVersion = None, loader = None, modVersion = None, filename = None, usingConnector = False):
 
         data = await self.modrinth.getVersionsInfo(modID, gameVersion, loader, usingConnector)
 
-        modName = None
-        downloadUrl = None
-        filename = None
-
-        if not modVersion:
-            modName = data[0]['name']
-            filename = data[0]['files'][0]['filename']
-            downloadUrl = data[0]['files'][0]['url']
-
-        else:
-            for i in range(len(data)):
-                if data[i]['version_number'] == modVersion:
-                    modName = data[i]['name']
-                    filename = data[i]['files'][0]['filename']
-                    downloadUrl = data[i]['files'][0]['url']
-
-                    break
-
-        if not downloadUrl:
-            modName = data[0]['name']
-            filename = data[0]['files'][0]['filename']
-            downloadUrl = data[0]['files'][0]['url']
+        downloadUrl, filename, modName = await self.getDownloadUrl(data, filename, modVersion)
 
         if not os.path.exists("mods"):
             os.makedirs("mods")
@@ -51,6 +32,33 @@ class DownloadManager:
 
             exit()
 
+    async def getDownloadUrl(self, data, filename, modVersion) -> tuple[Any, Any, Any]:
+
+        downloadUrl = None
+        modName = None
+
+        if filename:
+            for i in range(len(data)):
+                for j in data[i]['files']:
+                    if j['filename'] == filename:
+                        modName = data[i]['name']
+                        downloadUrl = j['url']
+
+        if modVersion:
+            for i in range(len(data)):
+                if data[i]['version_number'] == modVersion:
+                    modName = data[i]['name']
+                    filename = data[i]['files'][0]['filename']
+                    downloadUrl = data[i]['files'][0]['url']
+
+                    break
+
+        if not downloadUrl:
+            modName = data[0]['name']
+            filename = data[0]['files'][0]['filename']
+            downloadUrl = data[0]['files'][0]['url']
+
+        return downloadUrl, filename, modName
 
     async def parseFileAndDownload(self, file = None, gameVersion = None, loader = None, onlyServer = True, usingConnector = False):
 
@@ -96,6 +104,7 @@ class DownloadManager:
 
                 modID = i['url'].split('/')[-1]
                 modVersion = i['version']
+                filename = i['filename']
 
                 modEnvironment = await self.modrinth.getEnvironment(modID=modID, gameVersion=gameVersion, loader=loader, usingConnector=usingConnector)
 
@@ -106,7 +115,7 @@ class DownloadManager:
 
                         continue
 
-                await self.downloadMod(modID=modID, gameVersion=gameVersion, loader=loader, modVersion=modVersion, usingConnector=usingConnector)
+                await self.downloadMod(modID=modID, gameVersion=gameVersion, loader=loader, modVersion=modVersion, filename=filename, usingConnector=usingConnector)
 
         except Exception as e:
-            print(f"ERROR: {e} at mod with id {modID} in function {inspect.currentframe().f_code.co_name}")
+            print(f"ERROR: {e} in function {inspect.currentframe().f_code.co_name}")
