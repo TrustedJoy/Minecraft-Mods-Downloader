@@ -4,17 +4,20 @@ import requests
 import json
 
 class ModrinthManager:
-    def __init__(self):
+    def __init__(self, gameVersion, loader, usingConnector = False):
+        self.gameVersion = gameVersion
+        self.loader = loader
+        self.usingConnector = usingConnector
         pass
 
-    async def getVersionsInfo(self, modID = None, gameVersion = None, loader = None, usingConnector = False):
+    async def getVersionsInfo(self, modID = None):
         try:
             if not modID:
                 raise managerExceptions.ModNotProvided
 
-            if gameVersion and loader:
-                gameVersion = str(json.dumps([gameVersion]))
-                loader = str(json.dumps([loader]))
+            if self.gameVersion and self.loader:
+                gameVersion = str(json.dumps([self.gameVersion]))
+                loader = str(json.dumps([self.loader]))
 
                 url = f'https://api.modrinth.com/v2/project/{modID}/version'
 
@@ -22,7 +25,7 @@ class ModrinthManager:
                 r = requests.get(url, params=params)
 
                 if not len(r.json()):
-                    if usingConnector:
+                    if self.usingConnector:
                         loader = '["forge", "fabric", "neoforge]'
 
                         params = {'game_versions': gameVersion, 'loaders': loader}
@@ -42,12 +45,6 @@ class ModrinthManager:
         except Exception as e:
             print(f"ERROR: {e} at mod with ID {modID} in function {inspect.currentframe().f_code.co_name}")
 
-
-    async def getEnvironment(self, modID = None, gameVersion = None, loader = None, usingConnector = False):
-
-        data = await self.getVersionsInfo(modID, gameVersion, loader, usingConnector)
-
-        return data[0]['environment']
 
     async def downloadModFromModrinth(self, url = None, dest = None):
         try:
