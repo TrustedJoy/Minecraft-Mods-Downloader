@@ -2,17 +2,42 @@ import json
 import os
 import inspect
 import shutil
-
+import requests
+import managerExceptions
 import modrinthInterface
+import curseforgeInterface
 
 class DownloadManager:
     def __init__(self, gameVersion, loader, onlyServer = True, usingConnector = False):
         self.modrinth = modrinthInterface.ModrinthManager(gameVersion, loader, usingConnector)
+        self.curseforge = curseforgeInterface.curseforgeManager(gameVersion, loader, usingConnector)
         self.onlyServer = onlyServer
         self.usingConnector = usingConnector
-        self.downloadedModIDs = []
+        self.downloadedModIDsModrinth = []
 
-    async def downloadMod(self, data = None, modVersion = None, filename = None):
+    async def downloadMod(self, url = None, dest = None):
+        try:
+            if not url:
+                raise managerExceptions.NoURL
+
+            with requests.get(url, stream=True) as response:
+                with open(dest, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+
+        except Exception as e:
+
+            print(f"ERROR: {e} in function: {inspect.currentframe().f_code.co_name}")
+            return 0
+
+        return  1
+
+    async def downloadCurseforgeMod(self, data = None, modVersion = None, filename = None):
+
+
+        return
+
+    async def downloadModrinthMod(self, data = None, modVersion = None, filename = None):
         targetEntryPos = 0
         targetFilePos = 0
 
@@ -46,17 +71,17 @@ class DownloadManager:
                 dependencyData = await self.modrinth.getVersionsInfo(dependencyModID)
 
                 print(f"Downloading a dependency for {filename}")
-                await self.downloadMod(dependencyData, dependencyModVersion, dependencyFilename)
+                await self.downloadModrinthMod(dependencyData, dependencyModVersion, dependencyFilename)
 
-        if modID in self.downloadedModIDs:
+        if modID in self.downloadedModIDsModrinth:
             print(f"{filename} (or another version) already downloaded. Skipping!")
             return
 
-        success = await self.modrinth.downloadModFromModrinth(url=downloadUrl, dest=f"mods/{filename}")
+        success = await self.downloadMod(url=downloadUrl, dest=f"mods/{filename}")
 
         if success:
             print(f"Successfully downloaded {filename}")
-            self.downloadedModIDs.append(modID)
+            self.downloadedModIDsModrinth.append(modID)
 
         else:
             print(f"Failed at mod: {filename}")
@@ -67,7 +92,8 @@ class DownloadManager:
             return
 
     async def parseFileAndDownload(self, file = None):
-        #try:
+        try:
+            #create files and directories
             if os.path.exists('mods'):
                 shutil.rmtree('mods')
 
@@ -88,36 +114,37 @@ class DownloadManager:
             if not self.usingConnector:
                 print("Sinytra connector not being used. Only downloading mods that match given loader")
 
+            #pre-checks above
+
             for i in mods:
                 if not i['filename'].split('.')[-1] in ('jar', 'disabled'):
                     continue
 
-                if not i['url'].split('/')[2] == "modrinth.com":
-                    print("Curseforge Mod. Not able to download")
-                    with open('mods/.unable.txt', 'a+') as f:
-                        f.write(f"{i['url']}\n")
-                    continue
-
-                else:
+                if i['url'].split('/')[2] == "modrinth.com":
                     with open('mods/.able.txt', 'a+') as f:
                         f.write(f"{i['url']}\n")
 
-                    #continue
+                    modID = i['url'].split('/')[-1]
+                    modVersion = i['version']
+                    filename = i['filename']
 
-                modID = i['url'].split('/')[-1]
-                modVersion = i['version']
-                filename = i['filename']
+                    data = await self.modrinth.getVersionsInfo(modID=modID)
 
-                data = await self.modrinth.getVersionsInfo(modID=modID)
+                    modEnvironment = data[0]['environment']
 
-                modEnvironment = data[0]['environment']
+                    if self.onlyServer and modEnvironment in ("client_only"):
+                        print(f"Skipping mod {filename}. (In server only and mod is client only)")
+                        continue
 
-                if self.onlyServer and modEnvironment in ("client_only"):
-                    print(f"Skipping mod {filename}. (In server only and mod is client only)")
+                    await self.downloadModrinthMod(data=data, modVersion=modVersion, filename=filename)
+
+                else:
+                    print("Invalid Mod. Not able to download")
+
+                    with open('mods/.unable.txt', 'a+') as f:
+                        f.write(f"{i['url']}\n")
 
                     continue
 
-                await self.downloadMod(data=data, modVersion=modVersion, filename=filename)
-
-        #except Exception as e:
-        #    print(f"ERROR: {e} in function {inspect.currentframe().f_code.co_name}")
+        except Exception as e:
+            print(f"ERROR: {e} in function {inspect.currentframe().f_code.co_name}")

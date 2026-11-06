@@ -44,21 +44,3 @@ class ModrinthManager:
 
         except Exception as e:
             print(f"ERROR: {e} at mod with ID {modID} in function {inspect.currentframe().f_code.co_name}")
-
-
-    async def downloadModFromModrinth(self, url = None, dest = None):
-        try:
-            if not url:
-                raise managerExceptions.NoURL
-
-            with requests.get(url, stream=True) as response:
-                with open(dest, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
-
-        except Exception as e:
-
-            print(f"ERROR: {e} in function: {inspect.currentframe().f_code.co_name}")
-            return 0
-
-        return  1
