@@ -3,11 +3,6 @@
 
 I made this cause I was bored in class. Takes a json file exported from Prism and downloads all the mods. Mainly made it so I could automatically download mods for a server.
 
-Currently downloads only from modrinth
-
-Adds curseforge mods to a file called .unable.txt under the mods folder
-
-
 ## How To Use
 
 Download this repo either as a zip or clone it
@@ -36,4 +31,4 @@ If you are using sinytra make sure to pass 0/1 for onlyServer and 1 for usingCon
 
 
 ## EPILOGUE
-I just made this for fun when I was bored in class. I do plan to add support for curseforge and also have it be able to use text files with just the mod names. Though I don't know when that will happen
+I just made this for fun when I was bored in class. Works for both curseforge and modrinth. Will add support for just mod names soon (maybe)
