@@ -1,6 +1,6 @@
 import asyncio
 import sys
-from shutil import make_archive
+from traceback import print_tb
 
 from downloadInterface import DownloadManager
 
@@ -26,6 +26,8 @@ if __name__ == '__main__':
     dm = DownloadManager(gameVersion=gameVersion, loader=loader, onlyServer=onlyServer, usingConnector=usingConnector)
 
     asyncio.run(dm.parseFileAndDownload(file=args[1]))
+
+    print("Finished!")
 
 
 

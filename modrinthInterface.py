@@ -25,11 +25,15 @@ class ModrinthManager:
                 r = requests.get(url, params=params)
 
                 if not len(r.json()):
+                    print("Retry")
                     if self.usingConnector:
-                        loader = '["forge", "fabric", "neoforge]'
+                        loader = '["forge", "fabric", "neoforge"]'
 
                         params = {'game_versions': gameVersion, 'loaders': loader}
                         r = requests.get(url, params=params)
+
+                        if not len(r.json()):
+                            raise managerExceptions.EmptyResponse
 
                     else:
                         raise managerExceptions.EmptyResponse
@@ -41,6 +45,11 @@ class ModrinthManager:
 
             else:
                 raise managerExceptions.ParamError
+
+        except managerExceptions.EmptyResponse:
+            print(f"ERROR: No mod data found. Skipping!")
+
+            return None
 
         except Exception as e:
             print(f"ERROR: {e} at mod with ID {modID} in function {inspect.currentframe().f_code.co_name}")

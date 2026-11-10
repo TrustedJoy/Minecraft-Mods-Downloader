@@ -3,6 +3,7 @@ import os
 import inspect
 import shutil
 import requests
+import modLogging
 import managerExceptions
 import modrinthInterface
 import curseforgeInterface
@@ -14,6 +15,7 @@ class DownloadManager:
         self.onlyServer = onlyServer
         self.usingConnector = usingConnector
         self.downloadedModIDsModrinth = []
+        self.downloadedModIDsCurseforge = []
 
     async def downloadMod(self, url = None, dest = None):
         try:
@@ -32,10 +34,55 @@ class DownloadManager:
 
         return  1
 
-    async def downloadCurseforgeMod(self, data = None, modVersion = None, filename = None):
+    async def downloadCurseforgeMod(self, data = None, filename = None):
+        targetFilePos = 0
 
+        if filename:
+            for i in range(len(data)):
+                if data[i]['fileName'] == filename:
+                    targetFilePos = i
 
-        return
+        modID = data[targetFilePos]['modId']
+        filename = data[targetFilePos]['fileName']
+        downloadUrl = data[targetFilePos]['downloadUrl']
+
+        for i in data[targetFilePos]['dependencies']:
+            if i['relationType'] == 3:
+                dependencyModID = i['modId']
+
+                if dependencyModID == modID:
+                    continue
+
+                dependencyData = await self.curseforge.getModFileData(modID=dependencyModID)
+
+                if dependencyData is None:
+                    dependencyUrl = f"https://www.curseforge.com/projects/{modID}"
+                    modLogging.logUnable(reason="Dependency data not found", mod=dependencyUrl)
+
+                    continue
+
+                print(f"Downloading a dependency for {filename}")
+                await self.downloadCurseforgeMod(data=dependencyData)
+
+        if modID in self.downloadedModIDsCurseforge:
+            print(f"{filename} (or another version) already downloaded. Skipping!")
+            return
+
+        success = await self.downloadMod(url=downloadUrl, dest=f"mods/{filename}")
+
+        if success:
+            print(f"Successfully downloaded {filename}")
+            self.downloadedModIDsCurseforge.append(modID)
+
+        else:
+            modUrl = f"https://www.curseforge.com/projects/{modID}"
+
+            print(f"Failed at mod: {modUrl}")
+
+            modLogging.logUnable(reason="Failed during download", mod=modUrl)
+
+            return
+
 
     async def downloadModrinthMod(self, data = None, modVersion = None, filename = None):
         targetEntryPos = 0
@@ -70,6 +117,12 @@ class DownloadManager:
 
                 dependencyData = await self.modrinth.getVersionsInfo(dependencyModID)
 
+                if dependencyData is None:
+                    dependencyModUrl = f"https://modrinth.com/mod/{dependencyModID}"
+                    modLogging.logUnable(reason="Dependency failed", mod=dependencyModUrl)
+
+                    continue
+
                 print(f"Downloading a dependency for {filename}")
                 await self.downloadModrinthMod(dependencyData, dependencyModVersion, dependencyFilename)
 
@@ -84,10 +137,11 @@ class DownloadManager:
             self.downloadedModIDsModrinth.append(modID)
 
         else:
-            print(f"Failed at mod: {filename}")
+            modUrl = f"https://modrinth.com/mod/{modID}"
 
-            with open('mods/.unable.txt', 'a+') as f:
-                f.write(f"{filename}")
+            print(f"Failed at mod: {modUrl}")
+
+            modLogging.logUnable(reason="Failed during download", mod=modUrl)
 
             return
 
@@ -99,6 +153,7 @@ class DownloadManager:
 
             os.makedirs("mods", exist_ok=True)
 
+            #region Prechecks
             with open('mods/.able.txt', 'w'):
                 pass
 
@@ -113,22 +168,25 @@ class DownloadManager:
 
             if not self.usingConnector:
                 print("Sinytra connector not being used. Only downloading mods that match given loader")
-
-            #pre-checks above
+            #endregion
 
             for i in mods:
                 if not i['filename'].split('.')[-1] in ('jar', 'disabled'):
                     continue
 
                 if i['url'].split('/')[2] == "modrinth.com":
-                    with open('mods/.able.txt', 'a+') as f:
-                        f.write(f"{i['url']}\n")
+                    modLogging.logAble(mod=i['url'])
 
                     modID = i['url'].split('/')[-1]
                     modVersion = i['version']
                     filename = i['filename']
 
                     data = await self.modrinth.getVersionsInfo(modID=modID)
+
+                    if data is None:
+                        modLogging.logUnable(reason="No data found", mod=i['url'])
+
+                        continue
 
                     modEnvironment = data[0]['environment']
 
@@ -138,11 +196,25 @@ class DownloadManager:
 
                     await self.downloadModrinthMod(data=data, modVersion=modVersion, filename=filename)
 
+                elif i['url'].split('/')[-3] == "www.curseforge.com":
+                    modLogging.logAble(mod=i['url'])
+
+                    modID = i['url'].split('/')[-1]
+                    filename = i['filename']
+
+                    data = await self.curseforge.getModFileData(modID=modID)
+
+                    if data is None:
+                        modLogging.logUnable(reason="No data found", mod=i['url'])
+
+                        continue
+
+                    await self.downloadCurseforgeMod(data=data, filename=filename)
+
                 else:
                     print("Invalid Mod. Not able to download")
 
-                    with open('mods/.unable.txt', 'a+') as f:
-                        f.write(f"{i['url']}\n")
+                    modLogging.logUnable(reason="Invalid Mod", mod=i['url'])
 
                     continue
 

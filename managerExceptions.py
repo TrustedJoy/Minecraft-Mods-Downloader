@@ -36,4 +36,4 @@ class EmptyResponse(Exception):
         self.errorCode = 204
 
     def __str__(self):
-        return f"{self.message} (Error Code: {self.errorCode}"
+        return f"{self.message} (Error Code: {self.errorCode})"

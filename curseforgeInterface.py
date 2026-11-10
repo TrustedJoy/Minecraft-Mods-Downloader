@@ -13,7 +13,7 @@ class curseforgeManager:
         self.usingConnector = usingConnector
         self.APIKey = os.environ.get("CURSEFORGE_API")
 
-    def getModData(self, modID = None):
+    async def getModFileData(self, modID = None):
         try:
             if not  modID:
                 raise managerExceptions.ModNotProvided
@@ -33,6 +33,9 @@ class curseforgeManager:
                         r = requests.get(url=url, headers=headers, params=params)
                         data = r.json()['data']
 
+                        if not len(data):
+                            raise managerExceptions.EmptyResponse
+
                     else:
                         raise managerExceptions.EmptyResponse
 
@@ -41,9 +44,13 @@ class curseforgeManager:
 
                 return data
 
-
             else:
                 raise managerExceptions.ParamError
+
+        except managerExceptions.EmptyResponse:
+            print(f"ERROR: No mod data found. Skipping!")
+
+            return None
 
         except Exception as e:
             print(f"ERROR: {e} in function {inspect.currentframe().f_code.co_name}")
